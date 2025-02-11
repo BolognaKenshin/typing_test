@@ -27,6 +27,9 @@ def check_text_length():
         text_entry.delete(20, tk.END)
     window.after(50, check_text_length)
 
+def clear_entry_text(event):
+    text_entry.delete(0, tk.END)
+
 def fetch_next_line():
     global word_list
     line = ""
@@ -52,7 +55,7 @@ def update_gif(index):
     if index == frame_count:
         index = 0
     window.after(20, update_gif, index)
-
+3
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app_label = tk.Label(text="Carl's Type-Palooza!", font=("Arial", 28, "bold"), bg="#ffa384", bd=0)
@@ -69,7 +72,9 @@ flames_canvas.create_window(450, 150, window=gif_label, anchor="center")
 
 text_box_image = tk.PhotoImage(file="new_box.png")
 word_canvas = tk.Canvas(width=text_box_image.width(), height=text_box_image.height(), bd=0, highlightthickness=0)
-text_entry = tk.Entry(width=45, bg="white", font=("Arial, 18"), justify="center")
+text_entry = tk.Entry(width=45, bg="white", font=("Arial", 18), justify="center", fg="#424241")
+text_entry.insert(0, "Type here to begin")
+text_entry.bind("<FocusIn>", clear_entry_text)
 word_canvas.text_box_image = text_box_image
 word_canvas.create_image(0, 0, image=text_box_image, anchor="nw")
 word_canvas.create_window(390, 300, window=text_entry)
