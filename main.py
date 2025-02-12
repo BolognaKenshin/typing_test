@@ -3,6 +3,7 @@ import word_bank
 import random
 
 word_list_dict = {
+    "current_displayed_letters": [],
     "current_word": "",
     "entry_letters": [],
     "words_in_test": [],
@@ -58,14 +59,14 @@ def set_up_text():
     x = 390
     chars = 35
     first_word = True
-    current_displayed_letters = []
-    fetch_next_word()
+    current_displayed_letters = word_list_dict["current_displayed_letters"]
     for letter in word_list_dict["letters_list"]:
+        fetch_next_word()
         current_displayed_letters.append(word_canvas.create_text(x, 115, text=letter, font=("Arial", 22, "bold"), anchor="center", fill="blue"))
         x += 20
     #word_canvas.create_text(390, 165, text=fetch_next_line(), font=("Arial", 22, "bold"), anchor="center")
     #word_canvas.create_text(390, 215, text=fetch_next_line(), font=("Arial", 22, "bold"), anchor="center")
-    return current_displayed_letters
+
 
 def track_keys(event):
     global first_key
@@ -142,7 +143,7 @@ reset_button.grid(row=3, column=0)
 
 update_gif(0)
 check_text_length()
-word_list_dict["current_displayed_letters"] = set_up_text()
+set_up_text()
 
 window.mainloop()
 
