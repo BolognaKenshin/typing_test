@@ -3,9 +3,15 @@ import word_bank
 import random
 
 word_list_dict = {
-    "current_displayed_letters": [],
     "current_word": "",
+    "current_word_letters": [],
     "entry_letters": [],
+    "line_1_display": [],
+    "line_1_words": [],
+    "line_2_display": [],
+    "line_2_words": [],
+    "line_3_display": [],
+    "line_3_words": [],
     "words_in_test": [],
     "word_list": word_bank.words,
 }
@@ -38,11 +44,20 @@ def check_text_length():
 def clear_entry_text(event):
     text_entry.delete(0, tk.END)
 
-def fetch_next_word():
-    word = word_list_dict["word_list"][0]
-    word_list_dict["word_list"].remove(word)
-    word_list_dict["words_in_test"].append(word)
-    word_list_dict["letters_list"] = list(word)
+def fetch_next_line():
+    chars = 25
+    line_words = []
+    while chars > 0:
+        word = word_list_dict["word_list"][0]
+        word_list_dict["word_list"].remove(word)
+        word_letters = list(word)
+        word_letters.append(" ")
+        chars -= len(word_letters)
+        if chars <= 0:
+            return line_words
+        line_words.append(word_letters)
+
+
 
 def keep_time_and_score():
     global time_left, timer
@@ -58,50 +73,32 @@ def set_up_text():
     l1_x = 125
     l2_x = 125
     l3_x = 125
-    line_1_chars = 25
-    line_2_chars = 25
-    line_3_chars = 25
+    l1_d = word_list_dict["line_1_display"]
+    l2_d = word_list_dict["line_2_display"]
+    l3_d = word_list_dict["line_3_display"]
     first_word = True
-    current_displayed_letters = word_list_dict["current_displayed_letters"]
-    if first_word == True:
-        first_word = False
-        fetch_next_word()
-        word_list_dict["letters_list"].append(" ")
-        for letter in word_list_dict["letters_list"]:
-            current_displayed_letters.append(
-                word_canvas.create_text(l1_x, 115, text=letter, font=("Arial", 22, "bold"), fill="blue"))
-            l1_x += 20
-        line_1_chars -= len(word_list_dict["letters_list"])
+    word_list_dict["line_1_words"] = fetch_next_line()
+    word_list_dict["line_2_words"] = fetch_next_line()
+    word_list_dict["line_3_words"] = fetch_next_line()
 
-    while line_1_chars > 0:
-        fetch_next_word()
-        word_list_dict["letters_list"].append(" ")
-        line_1_chars -= len(word_list_dict["letters_list"])
-        if line_1_chars < 0:
-            line_1_chars = 0
-            pass
-        for letter in word_list_dict["letters_list"]:
-            current_displayed_letters.append(word_canvas.create_text(l1_x, 115, text=letter, font=("Arial", 22, "bold"), fill="black"))
-            l1_x += 20
-    while line_2_chars > 0:
-        fetch_next_word()
-        word_list_dict["letters_list"].append(" ")
-        line_2_chars -= len(word_list_dict["letters_list"])
-        if line_2_chars < 0:
-            line_2_chars = 0
-            pass
-        for letter in word_list_dict["letters_list"]:
-            word_canvas.create_text(l2_x, 165, text=letter, font=("Arial", 22, "bold"), fill="black")
+    for word in word_list_dict["line_1_words"]:
+            if first_word:
+                first_word = False
+                word_list_dict["current_word"] = word
+                for letter in word:
+                    l1_d.append(word_canvas.create_text(l1_x, 115, text=letter, font=("Arial", 22, "bold"), fill="blue"))
+                    l1_x += 20
+            else:
+                for letter in word:
+                    l1_d.append(word_canvas.create_text(l1_x, 115, text=letter, font=("Arial", 22, "bold"), fill="black"))
+                    l1_x += 20
+    for word in word_list_dict["line_2_words"]:
+        for letter in word:
+            l2_d.append(word_canvas.create_text(l2_x, 165, text=letter, font=("Arial", 22, "bold"), fill="black"))
             l2_x += 20
-    while line_3_chars > 0:
-        fetch_next_word()
-        word_list_dict["letters_list"].append(" ")
-        line_3_chars -= len(word_list_dict["letters_list"])
-        if line_3_chars < 0:
-            line_3_chars = 0
-            pass
-        for letter in word_list_dict["letters_list"]:
-            word_canvas.create_text(l3_x, 215, text=letter, font=("Arial", 22, "bold"), fill="black")
+    for word in word_list_dict["line_3_words"]:
+        for letter in word:
+            l3_d.append(word_canvas.create_text(l3_x, 215, text=letter, font=("Arial", 22, "bold"), fill="black"))
             l3_x += 20
 
 def track_keys(event):
@@ -133,17 +130,18 @@ def update_gif(index):
     window.after(20, update_gif, index)
 
 def update_current_word_display():
-    x = 390
-    current_display = word_list_dict["current_displayed_letters"]
-    current_letters = list(word_list_dict["words_in_test"][0])
+    current_word = word_list_dict["current_word"]
+    current_letters = []
+    for i in range(len(current_word)):
+        current_letters.append(word_list_dict["line_1_display"][i])
     entry_letters = word_list_dict["entry_letters"]
     for i in range (len(current_letters)):
         if not i < len(entry_letters):
-            word_canvas.itemconfig(current_display[i], fill="blue")
-        elif current_letters[i] == entry_letters[i]:
-            word_canvas.itemconfig(current_display[i], fill="green")
+            word_canvas.itemconfig(current_letters[i], fill="blue")
+        elif word_canvas.itemcget(current_letters[i], "text") == entry_letters[i]:
+            word_canvas.itemconfig(current_letters[i], fill="green")
         else:
-            word_canvas.itemconfig(current_display[i], fill="red")
+            word_canvas.itemconfig(current_letters[i], fill="red")
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
