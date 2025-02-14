@@ -29,12 +29,25 @@ frame_count = 25
 frames = [tk.PhotoImage(file="cat.gif", format = f'gif -index {i}') for i in range(frame_count)]
 
 corrected_cpm = 0
+total_cpm = 0
 wpm = 0
 time_left = 60
 first_key = True
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Functions
+
+def check_answer(current_word, user_submit, corrected_cpm):
+    if current_word == list(user_submit):
+        print("right!")
+        corrected_cpm += len(user_submit) + 1
+        for letter in word_list_dict["current_word_letters"]:
+            word_canvas.itemconfig(letter, fill="blue")
+    else:
+        print("wrong!")
+        for letter in word_list_dict["current_word_letters"]:
+            word_canvas.itemconfig(letter, fill="red")
+    return corrected_cpm
 
 def check_text_length():
     if len(text_entry.get()) > 20:
@@ -45,7 +58,7 @@ def clear_entry_text(event):
     text_entry.delete(0, tk.END)
 
 def fetch_next_line():
-    chars = 25
+    chars = 30
     line_words = []
     while chars > 0:
         word = word_list_dict["word_list"][0]
@@ -87,19 +100,19 @@ def set_up_text():
                 word_list_dict["current_word"] = word
                 for letter in word:
                     l1_d.append(word_canvas.create_text(l1_x, 115, text=letter, font=("Arial", 22, "bold"), fill="blue"))
-                    l1_x += 20
+                    l1_x += 21
             else:
                 for letter in word:
                     l1_d.append(word_canvas.create_text(l1_x, 115, text=letter, font=("Arial", 22, "bold"), fill="black"))
-                    l1_x += 20
+                    l1_x += 21
     for word in word_list_dict["line_2_words"]:
         for letter in word:
             l2_d.append(word_canvas.create_text(l2_x, 165, text=letter, font=("Arial", 22, "bold"), fill="black"))
-            l2_x += 20
+            l2_x += 21
     for word in word_list_dict["line_3_words"]:
         for letter in word:
             l3_d.append(word_canvas.create_text(l3_x, 215, text=letter, font=("Arial", 22, "bold"), fill="black"))
-            l3_x += 20
+            l3_x += 21
 
 def track_keys(event):
     global first_key
@@ -107,7 +120,8 @@ def track_keys(event):
         first_key = False
         keep_time_and_score()
     if event.char == ' ':
-        print("Submit function will go here when space is pressed!")
+        submit_word()
+        return "break"
     elif event.char == '\x08':
         if len(word_list_dict["entry_letters"]) > 0:
             word_list_dict["entry_letters"].pop()
@@ -135,6 +149,7 @@ def update_current_word_display():
     for i in range(len(current_word)):
         current_letters.append(word_list_dict["line_1_display"][i])
     entry_letters = word_list_dict["entry_letters"]
+    word_list_dict["current_word_letters"] = current_letters
     for i in range (len(current_letters)):
         if not i < len(entry_letters):
             word_canvas.itemconfig(current_letters[i], fill="blue")
@@ -142,6 +157,29 @@ def update_current_word_display():
             word_canvas.itemconfig(current_letters[i], fill="green")
         else:
             word_canvas.itemconfig(current_letters[i], fill="red")
+
+def submit_word():
+    global total_cpm, corrected_cpm
+    user_submit = text_entry.get()
+    total_cpm += len(user_submit) + 1
+    text_entry.delete(0, tk.END)
+    word_list_dict["entry_letters"] = []
+    current_word = word_list_dict["current_word"]
+    for i in range(len(word_list_dict["current_word"])):
+        word_list_dict["line_1_display"].pop(0)
+    current_word.pop()
+    word_list_dict["line_1_words"].pop(0)
+    if len(word_list_dict["line_1_words"]) > 0:
+        corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
+    else:
+        corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
+        print("Out of words!")
+        word_list_dict["line_1_display"] = word_list_dict["line_2_display"]
+        word_list_dict["line_1_words"] = word_list_dict["line_2_words"]
+    word_list_dict["current_word"] = word_list_dict["line_1_words"][0]
+    word_list_dict["current_word_letters"] = []
+    update_current_word_display()
+
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
