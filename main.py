@@ -1,6 +1,9 @@
-import tkinter as tk
-import word_bank
+import os
 import random
+import sys
+import tkinter as tk
+
+import word_bank
 
 word_list_dict = {
     "current_word": "",
@@ -42,12 +45,10 @@ first_key = True
 
 def check_answer(current_word, user_submit, corrected_cpm):
     if current_word == list(user_submit):
-        print("right!")
         corrected_cpm += len(user_submit) + 1
         for letter in word_list_dict["current_word_letters"]:
             word_canvas.itemconfig(letter, fill="blue")
     else:
-        print("wrong!")
         for letter in word_list_dict["current_word_letters"]:
             word_canvas.itemconfig(letter, fill="red")
     return corrected_cpm
@@ -79,7 +80,7 @@ def fill_lines():
     word_list_dict["line_3_words"] = fetch_next_line()
 
 def keep_time_and_score():
-    global time_left, timer
+    global time_left, timer, corrected_cpm, total_cpm, wpm
     time_left -= 1
     counter = window.after(1000, keep_time_and_score)
     word_canvas.delete(timer)
@@ -87,6 +88,15 @@ def keep_time_and_score():
     if time_left == 0:
         window.after_cancel(counter)
         print('Test done!')
+        score_window = tk.Toplevel(window)
+        score_window.title("WPM Score")
+        score_window.configure(width=400, height=400, bg="#ffa384")
+    word_canvas.itemconfig(cpm_score, text=f'Corrected CPM: {corrected_cpm}')
+    time_elapsed = 60 - time_left
+    chars_per_second = (corrected_cpm / time_elapsed)
+    wpm = int((chars_per_second * 60) / 5)
+    word_canvas.itemconfig(wpm_score, text=f"WPM: {wpm}")
+
 
 def refill_lines():
     word_list_dict["line_2_words"] = fetch_next_line()
@@ -97,6 +107,12 @@ def refill_lines():
         word_canvas.delete(letter)
     for letter in word_list_dict["line_3_delete"]:
         word_canvas.delete(letter)
+
+
+def restart():
+    # Get the path to the Python interpreter
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
 
 def set_up_text():
     l1_x = 125
@@ -147,7 +163,6 @@ def submit_word():
         corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
     else:
         corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
-        print("Out of words!")
         word_list_dict["line_1_display"] = word_list_dict["line_2_display"]
         word_list_dict["line_1_words"] = word_list_dict["line_2_words"]
         word_list_dict["line_2_words"] = word_list_dict["line_3_words"]
@@ -191,14 +206,11 @@ def update_current_word_display():
     entry_letters = word_list_dict["entry_letters"]
     word_list_dict["current_word_letters"] = current_letters
     for i in range (len(current_letters)):
-        print(word_canvas.itemcget(word_list_dict["line_1_display"][i], "text"))
         if not i < len(entry_letters):
             word_canvas.itemconfig(current_letters[i], fill="blue")
         elif word_canvas.itemcget(current_letters[i], "text") == entry_letters[i]:
             word_canvas.itemconfig(current_letters[i], fill="green")
-            print("Green!")
         else:
-            print("Red!")
             word_canvas.itemconfig(current_letters[i], fill="red")
 
 def update_gif(index):
@@ -232,12 +244,12 @@ text_entry.bind("<Key>", track_keys)
 word_canvas.text_box_image = text_box_image
 word_canvas.create_image(0, 0, image=text_box_image, anchor="nw")
 word_canvas.create_window(390, 300, window=text_entry)
-cpm_score = word_canvas.create_text(190, 50, text=f'Corrected CPM: {corrected_cpm}', font=("Arial", 10, "bold"), fill="white")
-wpm_score = word_canvas.create_text(390, 50, text=f'WPM: {wpm}', font=("Arial", 10, "bold"), fill="white")
-timer = word_canvas.create_text(590, 50, text=f'Time Left: {time_left}', font=("Arial", 10, "bold"), fill="white")
+cpm_score = word_canvas.create_text(190, 50, text=f'Corrected CPM: {corrected_cpm}', font=("Arial", 12, "bold"), fill="white")
+wpm_score = word_canvas.create_text(390, 50, text=f'WPM: {wpm}', font=("Arial", 12, "bold"), fill="white")
+timer = word_canvas.create_text(590, 50, text=f'Time Left: {time_left}', font=("Arial", 12, "bold"), fill="white")
 word_canvas.grid(row=2, column=0, pady=(20, 0))
 
-reset_button = tk.Button(text="Reset", font=("Arial", 10))
+reset_button = tk.Button(text="Reset", font=("Arial", 10), command=restart)
 reset_button.grid(row=3, column=0)
 
 update_gif(0)
