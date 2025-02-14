@@ -82,6 +82,9 @@ def keep_time_and_score():
         window.after_cancel(counter)
         print('Test done!')
 
+def refill_lines():
+    print("Refilling and moving lines!")
+
 def set_up_text():
     l1_x = 125
     l2_x = 125
@@ -114,6 +117,34 @@ def set_up_text():
             l3_d.append(word_canvas.create_text(l3_x, 215, text=letter, font=("Arial", 22, "bold"), fill="black"))
             l3_x += 21
 
+def submit_word():
+    global total_cpm, corrected_cpm
+    user_submit = text_entry.get()
+    total_cpm += len(user_submit) + 1
+    text_entry.delete(0, tk.END)
+    word_list_dict["entry_letters"] = []
+    current_word = word_list_dict["current_word"]
+    for i in range(len(word_list_dict["current_word"])):
+        word_list_dict["line_1_display"].pop(0)
+    current_word.pop()
+    word_list_dict["line_1_words"].pop(0)
+    if len(word_list_dict["line_1_words"]) > 0:
+        corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
+    else:
+        corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
+        print("Out of words!")
+        word_list_dict["line_1_display"] = word_list_dict["line_2_display"]
+        word_list_dict["line_1_words"] = word_list_dict["line_2_words"]
+        word_list_dict["line_2_words"] = word_list_dict["line_3_words"]
+        word_list_dict["line_2_display"] = word_list_dict["line_3_display"]
+        word_list_dict["line_3_words"] = []
+        word_list_dict["line_3_display"] = []
+    if len(word_list_dict["line_2_words"]) == 0 and len(word_list_dict["line_3_words"]) == 0:
+        refill_lines()
+    word_list_dict["current_word"] = word_list_dict["line_1_words"][0]
+    word_list_dict["current_word_letters"] = []
+    update_current_word_display()
+
 def track_keys(event):
     global first_key
     if first_key:
@@ -135,14 +166,6 @@ def track_keys(event):
         update_current_word_display()
 
 
-def update_gif(index):
-    frame = frames[index]
-    gif_label.configure(image=frame)
-    index += 1
-    if index == frame_count:
-        index = 0
-    window.after(20, update_gif, index)
-
 def update_current_word_display():
     current_word = word_list_dict["current_word"]
     current_letters = []
@@ -158,29 +181,13 @@ def update_current_word_display():
         else:
             word_canvas.itemconfig(current_letters[i], fill="red")
 
-def submit_word():
-    global total_cpm, corrected_cpm
-    user_submit = text_entry.get()
-    total_cpm += len(user_submit) + 1
-    text_entry.delete(0, tk.END)
-    word_list_dict["entry_letters"] = []
-    current_word = word_list_dict["current_word"]
-    for i in range(len(word_list_dict["current_word"])):
-        word_list_dict["line_1_display"].pop(0)
-    current_word.pop()
-    word_list_dict["line_1_words"].pop(0)
-    if len(word_list_dict["line_1_words"]) > 0:
-        corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
-    else:
-        corrected_cpm = check_answer(current_word, user_submit, corrected_cpm)
-        print("Out of words!")
-        word_list_dict["line_1_display"] = word_list_dict["line_2_display"]
-        word_list_dict["line_1_words"] = word_list_dict["line_2_words"]
-    word_list_dict["current_word"] = word_list_dict["line_1_words"][0]
-    word_list_dict["current_word_letters"] = []
-    update_current_word_display()
-
-
+def update_gif(index):
+    frame = frames[index]
+    gif_label.configure(image=frame)
+    index += 1
+    if index == frame_count:
+        index = 0
+    window.after(20, update_gif, index)
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
