@@ -35,13 +35,3 @@ words = [
     "field", "rock", "smile", "bright", "late", "goat", "swear", "hope", "kit", "race", "mist",
     "sit", "play", "trap", "goat", "pan", "tick", "plow", "cast", "jump", "wave", "pale", "shine"
 ]
-
-character_total = 0
-
-for word in words:
-    word_count = len(word) + 1
-    character_total += word_count
-
-character_average = character_total / len(words)
-print(f"The average number of characters is {character_average}.")
-print(f" The list contains {len(words)} words.")
