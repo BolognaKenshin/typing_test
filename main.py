@@ -25,10 +25,10 @@ word_list_dict = {
 random.shuffle(word_list_dict["word_list"])
 
 window = tk.Tk()
-window.minsize(width=900, height=850)
+window.minsize(width=900, height=900)
 window.configure(background="#ffa384")
 window.grid_columnconfigure(index=0, weight=1)
-window.title("Typing Test!")
+window.title("Speedy-Cat Typing-Tester!")
 
 gif = tk.PhotoImage(file="cat.gif")
 frame_count = 25
@@ -79,6 +79,25 @@ def fill_lines():
     word_list_dict["line_2_words"] = fetch_next_line()
     word_list_dict["line_3_words"] = fetch_next_line()
 
+def final_score(wpm, total_cpm, corrected_cpm):
+    score_window = tk.Toplevel(window)
+    score_window.grid_columnconfigure(index=0, weight=1)
+    score_window.title("Final Score")
+    score_window.configure(bg="#ffa384")
+    score_window.geometry("350x350")
+    t_cpm_label = tk.Label(score_window, text=f'Total CPM: {total_cpm}', font=("Arial", 20, "bold"), bg="#ffa384")
+    c_cpm_label = tk.Label(score_window, text=f'Corrected CPM: {corrected_cpm}', font=("Arial", 20, "bold"), bg="#ffa384")
+    wpm_label = tk.Label(score_window, text=f'Words per Minute: {wpm}', font=("Arial", 20, "bold"), bg="#ffa384")
+
+    reset_button = tk.Button(score_window, text="      Reset", fg="white", font=("Arial", 14), bd=0,
+                             image=word_canvas.button_pic, bg="#ffa384", activebackground="#ffa384",
+                             activeforeground="#ffa384", compound="center", highlightthickness=0, command=restart)
+
+    t_cpm_label.grid(row=0, column=0, pady=(50, 10))
+    c_cpm_label.grid(row=1, column=0, pady=10)
+    wpm_label.grid(row=2, column=0, pady=10)
+    reset_button.grid(row=3, column=0, padx=(0, 30), pady=30)
+
 def keep_time_and_score():
     global time_left, timer, corrected_cpm, total_cpm, wpm
     time_left -= 1
@@ -87,10 +106,8 @@ def keep_time_and_score():
     timer = word_canvas.create_text(590, 50, text=f'Time Left: {time_left}', font=("Arial", 10, "bold"), fill="white")
     if time_left == 0:
         window.after_cancel(counter)
-        print('Test done!')
-        score_window = tk.Toplevel(window)
-        score_window.title("WPM Score")
-        score_window.configure(width=400, height=400, bg="#ffa384")
+        final_score(wpm, total_cpm, corrected_cpm)
+
     word_canvas.itemconfig(cpm_score, text=f'Corrected CPM: {corrected_cpm}')
     time_elapsed = 60 - time_left
     chars_per_second = (corrected_cpm / time_elapsed)
@@ -223,7 +240,7 @@ def update_gif(index):
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-app_label = tk.Label(text="Carl's Type-Palooza!", font=("Arial", 28, "bold"), bg="#ffa384", bd=0)
+app_label = tk.Label(text="Speedy-Cat Typing-Tester!", font=("Arial", 28, "bold"), bg="#ffa384", bd=0)
 app_label.grid(row=0, column=0, pady=(30, 10))
 
 flames_image = tk.PhotoImage(file="flames.png")
@@ -247,10 +264,14 @@ word_canvas.create_window(390, 300, window=text_entry)
 cpm_score = word_canvas.create_text(190, 50, text=f'Corrected CPM: {corrected_cpm}', font=("Arial", 12, "bold"), fill="white")
 wpm_score = word_canvas.create_text(390, 50, text=f'WPM: {wpm}', font=("Arial", 12, "bold"), fill="white")
 timer = word_canvas.create_text(590, 50, text=f'Time Left: {time_left}', font=("Arial", 12, "bold"), fill="white")
-word_canvas.grid(row=2, column=0, pady=(20, 0))
+word_canvas.grid(row=2, column=0, pady=(5, 0))
 
-reset_button = tk.Button(text="Reset", font=("Arial", 10), command=restart)
-reset_button.grid(row=3, column=0)
+fish = tk.PhotoImage(file="fish.png")
+word_canvas.button_pic = fish
+reset_button = tk.Button(text="      Reset", fg="white", font=("Arial", 14), bd=0,
+                             image=word_canvas.button_pic, bg="#ffa384", activebackground="#ffa384",
+                             activeforeground="#ffa384", compound="center", highlightthickness=0, command=restart)
+reset_button.grid(row=3, column=0, padx=(0, 30))
 
 update_gif(0)
 check_text_length()
