@@ -18,7 +18,6 @@ word_list_dict = {
     "line_3_delete": [],
     "line_3_display": [],
     "line_3_words": [],
-    "words_in_test": [],
     "word_list": word_bank.words,
 }
 
